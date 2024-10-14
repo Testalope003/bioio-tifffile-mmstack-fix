@@ -141,7 +141,7 @@ class Reader(reader.Reader):
     def scenes(self) -> typing.Tuple[str, ...]:
         if self._scenes is None:
             with self._fs.open(self._path) as open_resource:
-                with TiffFile(open_resource, is_mmstack=False) as tiff:
+                with TiffFile(open_resource) as tiff:
                     # This is non-metadata tiff, just use available series indices
                     self._scenes = tuple(
                         generate_ome_image_id(i) for i in range(len(tiff.series))
@@ -202,7 +202,6 @@ class Reader(reader.Reader):
                 series=scene,
                 level=0,
                 chunkmode="page",
-                is_mmstack=False,
             ) as store:
                 arr = da.from_zarr(store)
                 arr = arr.transpose(transpose_indices)
@@ -473,7 +472,7 @@ class Reader(reader.Reader):
             The file could not be read or is not supported.
         """
         with self._fs.open(self._path) as open_resource:
-            with TiffFile(open_resource, is_mmstack=False) as tiff:
+            with TiffFile(open_resource) as tiff:
                 # Get dims from provided or guess
                 dims = self._get_dims_for_scene(tiff)
 
@@ -526,7 +525,7 @@ class Reader(reader.Reader):
             The file could not be read or is not supported.
         """
         with self._fs.open(self._path) as open_resource:
-            with TiffFile(open_resource, is_mmstack=False) as tiff:
+            with TiffFile(open_resource) as tiff:
                 # Get dims from provided or guess
                 dims = self._get_dims_for_scene(tiff)
 
@@ -596,7 +595,7 @@ def _get_pixel_size(
 ]:
     """Return the pixel size in microns (z,y,x) for the given series in a tiff path."""
 
-    with TiffFile(path_or_file, is_mmstack=False) as tiff:
+    with TiffFile(path_or_file) as tiff:
         tags = tiff.series[series_index].pages[0].tags
 
     if tiff.is_imagej:
